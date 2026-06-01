@@ -1,0 +1,9 @@
+pyproject.toml
+src/axiom/__init__.py
+src/axiom/api/__init__.py
+src/axiom/api/main.py
+src/axiom_platform.egg-info/PKG-INFO
+src/axiom_platform.egg-info/SOURCES.txt
+src/axiom_platform.egg-info/dependency_links.txt
+src/axiom_platform.egg-info/requires.txt
+src/axiom_platform.egg-info/top_level.txt
