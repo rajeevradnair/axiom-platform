@@ -6,7 +6,7 @@ The repository is named `axiom-platform`.
 
 The Python package is named `axiom`.
 
-## Core Security Rule
+## Core Trust Rules
 
 The AI agent is not the source of truth for user intent.
 
@@ -20,6 +20,23 @@ The trusted flow is:
 6. AI agent searches merchants and submits a Cart Mandate.
 7. Axiom compares the Cart Mandate against the signed Intent Mandate.
 8. Axiom approves, declines, or requests step-up approval.
+
+Trusted User Surface
+    ↓
+Intent Intelligence Service
+    ↓
+User Confirmation Layer
+    ↓
+Signed Intent Mandate Service
+    ↓
+Agent Gateway
+    ↓
+Cart Mandate Service
+    ↓
+Policy Engine
+    ↓
+Authorization Decision Engine
+
 
 The platform currently includes:
 
