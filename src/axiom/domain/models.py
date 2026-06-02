@@ -3,7 +3,7 @@ from decimal import Decimal
 from pydantic import BaseModel, Field
 
 from axiom.domain.enums import DecisionStatus, IntentType
-from axiom.domain.reason_codes import ReasonCode
+from axiom.domain.enums import ReasonCode
 
 class IntentMandate(BaseModel):
     mandate_id: str

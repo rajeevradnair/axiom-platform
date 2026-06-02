@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from axiom.domain.enums import DecisionStatus
 from axiom.domain.models import CartMandate, IntentMandate, PolicyDecision
-from axiom.domain.reason_codes import ReasonCode
+from axiom.domain.enums import ReasonCode
 
 
 def calculate_cart_total(cart: CartMandate) -> Decimal:
@@ -14,7 +14,7 @@ from decimal import Decimal
 
 from axiom.domain.enums import DecisionStatus
 from axiom.domain.models import CartMandate, IntentMandate, PolicyDecision
-from axiom.domain.reason_codes import ReasonCode
+from axiom.domain.enums import ReasonCode
 
 
 def calculate_cart_total(cart: CartMandate) -> Decimal:
@@ -57,7 +57,11 @@ def evaluate_policy(
 
     cart_total = calculate_cart_total(cart)
 
-    # Check for all kinds of rules here - amount limits, category restrictions, time windows, etc.
+    '''
+    Check for all kinds of rules here - amount limits, 
+    item match based on overlapping words in descriptions, 
+    category restrictions, time windows, etc.
+    '''
 
     if cart_total > intent.max_amount:
         reason_codes.append(ReasonCode.AMOUNT_EXCEEDS_LIMIT)
@@ -66,7 +70,6 @@ def evaluate_policy(
         if not item_matches_intent(intent.item_description, leg.item_description):
             reason_codes.append(ReasonCode.ITEM_MISMATCH)
             break
-
 
     for leg in cart.cart_legs:
         if leg.currency != intent.currency:

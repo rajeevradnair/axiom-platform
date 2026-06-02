@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(tags=["Health"])
+router = APIRouter(tags=["health"])
 
 @router.get("/api/v1/axiom/health")
 def health_check() -> dict[str, str]:
