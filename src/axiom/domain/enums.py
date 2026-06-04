@@ -10,19 +10,23 @@ class IntentType(StrEnum):
     BUNDLED_COMMERCE = "bundled_commerce"
 
 class DecisionStatus(StrEnum):
+    # Example: initial prompt is ambiguous and requires human clarification before a decision can be made.
+    HUMAN_CLARIFICATION_REQUIRED = "human_clarification_required" 
     PROCESSING = "processing"
     APPROVED = "approved"
     APPROVED_PENDING_VCC = "approved_pending_vcc"
     APPROVED_PENDING_MULTI_MERCHANT_CREDENTIALS = "approved_pending_multi_merchant_credentials"
     DECLINED = "declined"
     STEP_UP_REQUIRED = "step_up_required"
-    HUMAN_CLARIFICATION_REQUIRED = "human_clarification_required"
+    
 
 class ReasonCode(StrEnum):
     AMOUNT_EXCEEDS_LIMIT = "amount_exceeds_limit"
+    AMOUNT_REQUIRES_APPROVAL = "amount_requires_approval"
     CATEGORY_NOT_ALLOWED = "category_not_allowed"
     ITEM_MISMATCH = "item_mismatch"
     MERCHANT_NOT_APPROVED = "merchant_not_approved"
+    MERCHANT_BLOCKED = "merchant_blocked"
     MERCHANT_RISK_TOO_HIGH = "merchant_risk_too_high"
     OFFER_NOT_ELIGIBLE = "offer_not_eligible"
     CARDMEMBER_NOT_ELIGIBLE = "cardmember_not_eligible"

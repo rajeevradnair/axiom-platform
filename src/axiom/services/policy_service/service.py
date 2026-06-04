@@ -15,6 +15,7 @@ from decimal import Decimal
 from axiom.domain.enums import DecisionStatus
 from axiom.domain.models import CartMandate, IntentMandate, PolicyDecision
 from axiom.domain.enums import ReasonCode
+from axiom.services.merchant_policy_service.service import is_approved_merchant, is_blocked_merchant
 
 
 def calculate_cart_total(cart: CartMandate) -> Decimal:
@@ -32,7 +33,7 @@ def normalize_text(value: str) -> set[str]:
     return {word for word in cleaned.split() if word}
 
 
-def item_matches_intent(intent_description: str | None, cart_description: str) -> bool:
+def cartmandate_matches_intentmandate(intent_description: str | None, cart_description: str) -> bool:
     if not intent_description:
         return True
 
@@ -53,7 +54,10 @@ def evaluate_policy(
     intent: IntentMandate,
     cart: CartMandate,
 ) -> PolicyDecision:
+    
     reason_codes: list[ReasonCode] = []
+
+    step_up_required = False
 
     cart_total = calculate_cart_total(cart)
 
@@ -67,7 +71,7 @@ def evaluate_policy(
         reason_codes.append(ReasonCode.AMOUNT_EXCEEDS_LIMIT)
 
     for leg in cart.cart_legs:
-        if not item_matches_intent(intent.item_description, leg.item_description):
+        if not cartmandate_matches_intentmandate(intent.item_description, leg.item_description):
             reason_codes.append(ReasonCode.ITEM_MISMATCH)
             break
 
@@ -86,11 +90,43 @@ def evaluate_policy(
     if intent.expires_at < now:
         reason_codes.append(ReasonCode.TIME_WINDOW_EXPIRED)
 
-    status = (
-        DecisionStatus.APPROVED
-        if not reason_codes
-        else DecisionStatus.DECLINED
-    )
+    for leg in cart.cart_legs:
+        if is_blocked_merchant(leg.merchant_name):
+            reason_codes.append(ReasonCode.MERCHANT_BLOCKED)
+            break
+
+    for leg in cart.cart_legs:
+        if not is_approved_merchant(leg.merchant_name):
+            reason_codes.append(ReasonCode.MERCHANT_NOT_APPROVED)
+            break
+
+    if intent.approval_required:
+        step_up_required = True
+        reason_codes.append(ReasonCode.APPROVAL_REQUIRED)
+
+    if intent.per_order_approval_threshold is not None:
+        for leg in cart.cart_legs:
+            if leg.amount > intent.per_order_approval_threshold:
+                step_up_required = True
+                reason_codes.append(ReasonCode.AMOUNT_REQUIRES_APPROVAL)
+                break
+
+    hard_decline_reasons = {
+        ReasonCode.AMOUNT_EXCEEDS_LIMIT,
+        ReasonCode.CURRENCY_MISMATCH,
+        ReasonCode.CATEGORY_NOT_ALLOWED,
+        ReasonCode.ITEM_MISMATCH,
+        ReasonCode.TIME_WINDOW_EXPIRED,
+        ReasonCode.MERCHANT_BLOCKED,
+        ReasonCode.MERCHANT_NOT_APPROVED,
+    }
+
+    if any(reason in hard_decline_reasons for reason in reason_codes):
+        status = DecisionStatus.DECLINED
+    elif step_up_required:
+        status = DecisionStatus.STEP_UP_REQUIRED
+    else:
+        status = DecisionStatus.APPROVED
 
     return PolicyDecision(
         decision_id=decision_id,

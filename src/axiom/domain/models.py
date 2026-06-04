@@ -15,6 +15,19 @@ class IntentMandate(BaseModel):
     currency: str = "USD"
     expires_at: datetime
     approval_required: bool = False
+    per_order_approval_threshold: Decimal | None = None
+    
+
+class SignedIntentMandate(BaseModel):
+    mandate_id: str
+    payload: IntentMandate
+    payload_hash: str
+    signature: str
+    signing_key_id: str
+    public_key_pem: str
+    signature_algorithm: str = "ECDSA_P256_SHA256"
+    signed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
 
 class CartLeg(BaseModel):
     leg_id: str
@@ -38,3 +51,4 @@ class PolicyDecision(BaseModel):
     reason_codes: list[ReasonCode] = Field(default_factory=list)
     risk_score: float | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
